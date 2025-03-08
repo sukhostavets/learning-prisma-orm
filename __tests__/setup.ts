@@ -68,9 +68,6 @@ beforeAll(async () => {
   
   // Configure the Express app for testing
   app = configureApp(3000);
-  
-  // Replace the global fetch function for supertest
-  global.fetch = request(app) as any;
 }, 60000); // Increase timeout for container startup
 
 afterAll(async () => {
