@@ -136,7 +136,6 @@ prisma/migrations/
 
 # IDE
 .idea/
-.vscode/
 *.swp
 *.swo
 
@@ -150,3 +149,6 @@ Thumbs.db
 
 # Prisma
 .prisma/
+
+# GitHub Actions
+.github/workflows/.env

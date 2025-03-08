@@ -312,24 +312,51 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = Number(id);
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
-      where: { id: Number(id) },
+      where: { id: userId },
     });
 
     if (!existingUser) {
-      res.status(404).json({ error: 'User not found' });
-      return;
+       res.status(404).json({ error: 'User not found' });
+       return;
     }
 
-    // Delete user
+    // Delete related comments first
+    await prisma.comment.deleteMany({
+      where: { authorId: userId },
+    });
+
+    // Delete related posts (and their comments)
+    // First, get all posts by this user
+    const userPosts = await prisma.post.findMany({
+      where: { authorId: userId },
+      select: { id: true },
+    });
+
+    // Delete comments on those posts
+    if (userPosts.length > 0) {
+      const postIds = userPosts.map(post => post.id);
+      await prisma.comment.deleteMany({
+        where: { postId: { in: postIds } },
+      });
+    }
+
+    // Now delete the posts
+    await prisma.post.deleteMany({
+      where: { authorId: userId },
+    });
+
+    // Finally delete the user
     await prisma.user.delete({
-      where: { id: Number(id) },
+      where: { id: userId },
     });
 
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
+    console.error('Error deleting user:', error);
     res.status(500).json({ error: 'Failed to delete user' });
   }
 });

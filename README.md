@@ -1,5 +1,6 @@
 # Learning Prisma ORM
 
+![CI](https://github.com/sukhostavets/learning-prisma-orm/actions/workflows/ci.yml/badge.svg)
 A project for learning Prisma ORM with TypeScript, Express, and PostgreSQL in Docker.
 
 ## Features
@@ -9,6 +10,10 @@ A project for learning Prisma ORM with TypeScript, Express, and PostgreSQL in Do
 - Prisma ORM for database operations
 - Swagger UI for API documentation
 - TypeScript for type safety
+- End-to-end testing with Jest, SuperTest, and TestContainers
+- ESLint and Prettier for code quality
+- VSCode integration for development and debugging
+- CI/CD with GitHub Actions
 
 ## Project Structure
 
@@ -18,21 +23,39 @@ learning-prisma-orm/
 │   ├── schema.prisma        # Prisma schema definition
 │   └── migrations/          # Database migrations
 ├── src/                     # Source code
+│   ├── app.ts               # Express app configuration
 │   ├── controllers/         # Controllers for business logic
 │   ├── models/              # Data models
 │   ├── routes/              # API routes
 │   │   ├── userRoutes.ts    # User routes
 │   │   ├── postRoutes.ts    # Post routes
-│   │   └── commentRoutes.ts # Comment routes
+│   │   ├── commentRoutes.ts # Comment routes
+│   │   └── testRoutes.ts    # Testing routes
 │   ├── services/            # Services for business logic
 │   ├── utils/               # Utility functions
 │   ├── lib/                 # Library code
 │   │   └── prisma.ts        # Prisma client instance
 │   └── index.ts             # Application entry point
+├── __tests__/               # Test files
+│   ├── e2e/                 # End-to-end tests
+│   │   ├── user.test.ts     # User API tests
+│   │   └── post.test.ts     # Post API tests
+│   └── setup.ts             # Test setup and utilities
+├── .github/                 # GitHub configuration
+│   └── workflows/           # GitHub Actions workflows
+│       └── ci.yml           # CI workflow
+├── .vscode/                 # VSCode configuration
+│   ├── launch.json          # Debug configurations
+│   └── tasks.json           # Task definitions
 ├── .env                     # Environment variables
+├── .env.test                # Test environment variables
+├── .env.example             # Example environment variables
+├── .eslintrc.js             # ESLint configuration
+├── .prettierrc              # Prettier configuration
 ├── docker-compose.yml       # Docker Compose configuration
 ├── package.json             # Project dependencies
 ├── tsconfig.json            # TypeScript configuration
+├── jest.config.js           # Jest configuration
 └── README.md                # Project documentation
 ```
 
@@ -122,6 +145,11 @@ The API provides the following endpoints:
 - `PUT /api/comments/:id` - Update a comment
 - `DELETE /api/comments/:id` - Delete a comment
 
+### Testing Utilities
+
+- `POST /api/test/seed` - Seed the database with test data
+- `POST /api/test/clear` - Clear all data from the database
+
 ## Database Schema
 
 The database schema includes the following models:
@@ -167,6 +195,56 @@ npm run prisma:studio
 
 This will open Prisma Studio on http://localhost:5555.
 
+## Testing
+
+### Running Tests
+
+The project uses TestContainers to spin up a PostgreSQL container for testing, so you don't need to have a separate database running.
+
+To run all tests:
+
+```bash
+npm test
+```
+
+To run tests in watch mode:
+
+```bash
+npm run test:watch
+```
+
+To run end-to-end tests specifically:
+
+```bash
+npm run test:e2e
+```
+
+To run tests in CI environment:
+
+```bash
+npm run test:ci
+```
+
+### Test Architecture
+
+The testing setup uses:
+
+- **Jest**: As the test runner and assertion library
+- **SuperTest**: For making HTTP requests to the Express app
+- **TestContainers**: For spinning up a PostgreSQL container for testing
+
+The test setup in `__tests__/setup.ts` handles:
+
+1. Starting a PostgreSQL container
+2. Setting up the database with the Prisma schema
+3. Creating a test-specific Prisma client
+4. Configuring the Express app for testing
+5. Providing utilities for seeding and clearing the database
+
+### Test Data
+
+The test endpoints provide a way to seed the database with test data. This is useful for both manual testing and automated tests.
+
 ## Scripts
 
 - `npm run start` - Start the production server
@@ -175,7 +253,57 @@ This will open Prisma Studio on http://localhost:5555.
 - `npm run prisma:generate` - Generate Prisma Client
 - `npm run prisma:migrate` - Create and apply migrations
 - `npm run prisma:studio` - Open Prisma Studio
+- `npm test` - Run all tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:e2e` - Run end-to-end tests
+- `npm run test:ci` - Run tests in CI environment
+
+## Development
+
+### Code Quality
+
+The project uses ESLint and Prettier to ensure code quality and consistent formatting:
+
+```bash
+# Lint the code
+npm run lint
+
+# Format the code
+npm run format
+```
+
+### VSCode Integration
+
+This project includes VSCode configurations for an optimal development experience:
+
+1. **Tasks**: Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS) and type "Tasks: Run Task" to access the following tasks:
+   - Start Development Server
+   - Run Tests
+   - Run Tests (Watch Mode)
+   - Lint Project
+   - Format Project
+   - Build Project
+   - Start Prisma Studio
+
+2. **Debugging**: Press `F5` to start debugging. You can select from the following configurations:
+   - Debug Application
+   - Debug Tests
+   - Debug Current Test File
 
 ## License
 
 This project is licensed under the ISC License.
+
+## CI/CD
+
+This project uses GitHub Actions for continuous integration and deployment.
+
+### CI Workflow
+
+The CI workflow runs on every push to the main branch and on pull requests. It consists of three jobs:
+
+1. **Lint**: Runs ESLint to check code quality
+2. **Build**: Builds the TypeScript code and generates the Prisma client
+3. **Test**: Runs the test suite using TestContainers for PostgreSQL
+
+To view the status of the CI workflow, go to the "Actions" tab in the GitHub repository.

@@ -1,7 +1,23 @@
 import { PrismaClient } from '@prisma/client';
 
-// Initialize Prisma client
-const prisma = new PrismaClient();
+// Initialize Prisma client with optional URL
+const createPrismaClient = (databaseUrl?: string) => {
+  const prismaOptions: any = {};
+  
+  // If a database URL is provided, use it
+  if (databaseUrl) {
+    prismaOptions.datasources = {
+      db: {
+        url: databaseUrl,
+      },
+    };
+  }
+  
+  return new PrismaClient(prismaOptions);
+};
+
+// Create the default Prisma client
+const prisma = createPrismaClient();
 
 // Handle graceful shutdown
 process.on('SIGINT', async () => {
@@ -14,4 +30,5 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
-export default prisma; 
+export default prisma;
+export { createPrismaClient }; 
