@@ -1,7 +1,7 @@
-import express from 'express';
-import prisma from '../lib/prisma';
+import express from 'express'
+import prisma from '../lib/prisma'
 
-const router = express.Router();
+const router = express.Router()
 
 /**
  * @swagger
@@ -74,11 +74,11 @@ const router = express.Router();
  */
 router.get('/', async (req, res) => {
   try {
-    const { postId } = req.query;
-    
-    const where: any = {};
+    const { postId } = req.query
+
+    const where: any = {}
     if (postId) {
-      where.postId = Number(postId);
+      where.postId = Number(postId)
     }
 
     const comments = await prisma.comment.findMany({
@@ -98,13 +98,13 @@ router.get('/', async (req, res) => {
           },
         },
       },
-    });
-    
-    res.json(comments);
+    })
+
+    res.json(comments)
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch comments' });
+    res.status(500).json({ error: 'Failed to fetch comments' })
   }
-});
+})
 
 /**
  * @swagger
@@ -131,7 +131,7 @@ router.get('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params
     const comment = await prisma.comment.findUnique({
       where: { id: Number(id) },
       include: {
@@ -149,18 +149,18 @@ router.get('/:id', async (req, res) => {
           },
         },
       },
-    });
+    })
 
     if (!comment) {
-       res.status(404).json({ error: 'Comment not found' });
-       return;
+      res.status(404).json({ error: 'Comment not found' })
+      return
     }
 
-    res.json(comment);
+    res.json(comment)
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch comment' });
+    res.status(500).json({ error: 'Failed to fetch comment' })
   }
-});
+})
 
 /**
  * @swagger
@@ -199,26 +199,26 @@ router.get('/:id', async (req, res) => {
  */
 router.post('/', async (req, res) => {
   try {
-    const { content, postId, authorId } = req.body;
+    const { content, postId, authorId } = req.body
 
     // Check if post exists
     const post = await prisma.post.findUnique({
       where: { id: Number(postId) },
-    });
+    })
 
     if (!post) {
-      res.status(404).json({ error: 'Post not found' });
-      return;
+      res.status(404).json({ error: 'Post not found' })
+      return
     }
 
     // Check if author exists
     const author = await prisma.user.findUnique({
       where: { id: Number(authorId) },
-    });
+    })
 
     if (!author) {
-      res.status(404).json({ error: 'Author not found' });
-      return;
+      res.status(404).json({ error: 'Author not found' })
+      return
     }
 
     // Create comment
@@ -243,13 +243,13 @@ router.post('/', async (req, res) => {
           },
         },
       },
-    });
+    })
 
-    res.status(201).json(comment);
+    res.status(201).json(comment)
   } catch (error) {
-    res.status(400).json({ error: 'Failed to create comment' });
+    res.status(400).json({ error: 'Failed to create comment' })
   }
-});
+})
 
 /**
  * @swagger
@@ -287,17 +287,17 @@ router.post('/', async (req, res) => {
  */
 router.put('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { content } = req.body;
+    const { id } = req.params
+    const { content } = req.body
 
     // Check if comment exists
     const existingComment = await prisma.comment.findUnique({
       where: { id: Number(id) },
-    });
+    })
 
     if (!existingComment) {
-      res.status(404).json({ error: 'Comment not found' });
-      return;
+      res.status(404).json({ error: 'Comment not found' })
+      return
     }
 
     // Update comment
@@ -321,13 +321,13 @@ router.put('/:id', async (req, res) => {
           },
         },
       },
-    });
+    })
 
-    res.json(comment);
+    res.json(comment)
   } catch (error) {
-    res.status(400).json({ error: 'Failed to update comment' });
+    res.status(400).json({ error: 'Failed to update comment' })
   }
-});
+})
 
 /**
  * @swagger
@@ -350,27 +350,27 @@ router.put('/:id', async (req, res) => {
  */
 router.delete('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params
 
     // Check if comment exists
     const existingComment = await prisma.comment.findUnique({
       where: { id: Number(id) },
-    });
+    })
 
     if (!existingComment) {
-      res.status(404).json({ error: 'Comment not found' });
-      return;
+      res.status(404).json({ error: 'Comment not found' })
+      return
     }
 
     // Delete comment
     await prisma.comment.delete({
       where: { id: Number(id) },
-    });
+    })
 
-    res.json({ message: 'Comment deleted successfully' });
+    res.json({ message: 'Comment deleted successfully' })
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete comment' });
+    res.status(500).json({ error: 'Failed to delete comment' })
   }
-});
+})
 
-export default router; 
+export default router

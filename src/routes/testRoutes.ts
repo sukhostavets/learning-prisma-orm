@@ -1,8 +1,8 @@
-import express from 'express';
-import prisma from '../lib/prisma';
-import bcrypt from 'bcrypt';
+import express from 'express'
+import prisma from '../lib/prisma'
+import bcrypt from 'bcrypt'
 
-const router = express.Router();
+const router = express.Router()
 
 /**
  * @swagger
@@ -40,9 +40,9 @@ const router = express.Router();
 router.post('/seed', async (req, res) => {
   try {
     // Clear existing data
-    await prisma.comment.deleteMany({});
-    await prisma.post.deleteMany({});
-    await prisma.user.deleteMany({});
+    await prisma.comment.deleteMany({})
+    await prisma.post.deleteMany({})
+    await prisma.user.deleteMany({})
 
     // Create test users
     const users = await Promise.all([
@@ -67,7 +67,7 @@ router.post('/seed', async (req, res) => {
           password: await bcrypt.hash('password123', 10),
         },
       }),
-    ]);
+    ])
 
     // Create test posts
     const posts = await Promise.all([
@@ -95,7 +95,7 @@ router.post('/seed', async (req, res) => {
           authorId: users[0].id,
         },
       }),
-    ]);
+    ])
 
     // Create test comments
     const comments = await Promise.all([
@@ -120,7 +120,7 @@ router.post('/seed', async (req, res) => {
           authorId: users[0].id,
         },
       }),
-    ]);
+    ])
 
     res.json({
       message: 'Database seeded successfully',
@@ -129,12 +129,12 @@ router.post('/seed', async (req, res) => {
         posts,
         comments,
       },
-    });
+    })
   } catch (error) {
-    console.error('Error seeding database:', error);
-    res.status(500).json({ error: 'Failed to seed database' });
+    console.error('Error seeding database:', error)
+    res.status(500).json({ error: 'Failed to seed database' })
   }
-});
+})
 
 /**
  * @swagger
@@ -156,15 +156,15 @@ router.post('/seed', async (req, res) => {
 router.post('/clear', async (req, res) => {
   try {
     // Clear all data
-    await prisma.comment.deleteMany({});
-    await prisma.post.deleteMany({});
-    await prisma.user.deleteMany({});
+    await prisma.comment.deleteMany({})
+    await prisma.post.deleteMany({})
+    await prisma.user.deleteMany({})
 
-    res.json({ message: 'Database cleared successfully' });
+    res.json({ message: 'Database cleared successfully' })
   } catch (error) {
-    console.error('Error clearing database:', error);
-    res.status(500).json({ error: 'Failed to clear database' });
+    console.error('Error clearing database:', error)
+    res.status(500).json({ error: 'Failed to clear database' })
   }
-});
+})
 
-export default router; 
+export default router

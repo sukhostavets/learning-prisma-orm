@@ -1,7 +1,7 @@
-import express from 'express';
-import prisma from '../lib/prisma';
+import express from 'express'
+import prisma from '../lib/prisma'
 
-const router = express.Router();
+const router = express.Router()
 
 /**
  * @swagger
@@ -77,11 +77,11 @@ const router = express.Router();
  */
 router.get('/', async (req, res) => {
   try {
-    const { published } = req.query;
-    
-    const where: any = {};
+    const { published } = req.query
+
+    const where: any = {}
     if (published !== undefined) {
-      where.published = published === 'true';
+      where.published = published === 'true'
     }
 
     const posts = await prisma.post.findMany({
@@ -95,13 +95,13 @@ router.get('/', async (req, res) => {
           },
         },
       },
-    });
-    
-    res.json(posts);
+    })
+
+    res.json(posts)
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch posts' });
+    res.status(500).json({ error: 'Failed to fetch posts' })
   }
-});
+})
 
 /**
  * @swagger
@@ -128,7 +128,7 @@ router.get('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params
     const post = await prisma.post.findUnique({
       where: { id: Number(id) },
       include: {
@@ -141,18 +141,18 @@ router.get('/:id', async (req, res) => {
         },
         comments: true,
       },
-    });
+    })
 
     if (!post) {
-      res.status(404).json({ error: 'Post not found' });
-      return;
+      res.status(404).json({ error: 'Post not found' })
+      return
     }
 
-    res.json(post);
+    res.json(post)
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch post' });
+    res.status(500).json({ error: 'Failed to fetch post' })
   }
-});
+})
 
 /**
  * @swagger
@@ -192,16 +192,16 @@ router.get('/:id', async (req, res) => {
  */
 router.post('/', async (req, res) => {
   try {
-    const { title, content, published, authorId } = req.body;
+    const { title, content, published, authorId } = req.body
 
     // Check if author exists
     const author = await prisma.user.findUnique({
       where: { id: Number(authorId) },
-    });
+    })
 
     if (!author) {
-      res.status(404).json({ error: 'Author not found' });
-      return;
+      res.status(404).json({ error: 'Author not found' })
+      return
     }
 
     // Create post
@@ -221,13 +221,13 @@ router.post('/', async (req, res) => {
           },
         },
       },
-    });
+    })
 
-    res.status(201).json(post);
+    res.status(201).json(post)
   } catch (error) {
-    res.status(400).json({ error: 'Failed to create post' });
+    res.status(400).json({ error: 'Failed to create post' })
   }
-});
+})
 
 /**
  * @swagger
@@ -269,17 +269,17 @@ router.post('/', async (req, res) => {
  */
 router.put('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { title, content, published } = req.body;
+    const { id } = req.params
+    const { title, content, published } = req.body
 
     // Check if post exists
     const existingPost = await prisma.post.findUnique({
       where: { id: Number(id) },
-    });
+    })
 
     if (!existingPost) {
-      res.status(404).json({ error: 'Post not found' });
-      return;
+      res.status(404).json({ error: 'Post not found' })
+      return
     }
 
     // Update post
@@ -299,13 +299,13 @@ router.put('/:id', async (req, res) => {
           },
         },
       },
-    });
+    })
 
-    res.json(post);
+    res.json(post)
   } catch (error) {
-    res.status(400).json({ error: 'Failed to update post' });
+    res.status(400).json({ error: 'Failed to update post' })
   }
-});
+})
 
 /**
  * @swagger
@@ -328,27 +328,27 @@ router.put('/:id', async (req, res) => {
  */
 router.delete('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params
 
     // Check if post exists
     const existingPost = await prisma.post.findUnique({
       where: { id: Number(id) },
-    });
+    })
 
     if (!existingPost) {
-      res.status(404).json({ error: 'Post not found' });
-      return;
+      res.status(404).json({ error: 'Post not found' })
+      return
     }
 
     // Delete post
     await prisma.post.delete({
       where: { id: Number(id) },
-    });
+    })
 
-    res.json({ message: 'Post deleted successfully' });
+    res.json({ message: 'Post deleted successfully' })
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete post' });
+    res.status(500).json({ error: 'Failed to delete post' })
   }
-});
+})
 
-export default router; 
+export default router

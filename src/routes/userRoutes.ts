@@ -1,8 +1,8 @@
-import express from 'express';
-import prisma from '../lib/prisma';
-import bcrypt from 'bcrypt';
+import express from 'express'
+import prisma from '../lib/prisma'
+import bcrypt from 'bcrypt'
 
-const router = express.Router();
+const router = express.Router()
 
 /**
  * @swagger
@@ -78,12 +78,12 @@ router.get('/', async (req, res) => {
         // Exclude password for security
         password: false,
       },
-    });
-    res.json(users);
+    })
+    res.json(users)
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch users' });
+    res.status(500).json({ error: 'Failed to fetch users' })
   }
-});
+})
 
 /**
  * @swagger
@@ -110,7 +110,7 @@ router.get('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params
     const user = await prisma.user.findUnique({
       where: { id: Number(id) },
       select: {
@@ -122,18 +122,19 @@ router.get('/:id', async (req, res) => {
         // Exclude password for security
         password: false,
       },
-    });
+    })
 
     if (!user) {
-      res.status(404).json({ error: 'User not found' });
-      return;
+      res.status(404).json({ error: 'User not found' })
+      return
     }
 
-    res.json(user);
+    res.json(user)
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch user' });
+    console.error('Error fetching user:', error)
+    res.status(500).json({ error: 'Failed to fetch user' })
   }
-});
+})
 
 /**
  * @swagger
@@ -171,20 +172,20 @@ router.get('/:id', async (req, res) => {
  */
 router.post('/', async (req, res) => {
   try {
-    const { email, name, password } = req.body;
+    const { email, name, password } = req.body
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
-    });
+    })
 
     if (existingUser) {
-      res.status(409).json({ error: 'Email already exists' });
-      return;
+      res.status(409).json({ error: 'Email already exists' })
+      return
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10)
 
     // Create user
     const user = await prisma.user.create({
@@ -202,13 +203,13 @@ router.post('/', async (req, res) => {
         // Exclude password for security
         password: false,
       },
-    });
+    })
 
-    res.status(201).json(user);
+    res.status(201).json(user)
   } catch (error) {
-    res.status(400).json({ error: 'Failed to create user' });
+    res.status(400).json({ error: 'Failed to create user' })
   }
-});
+})
 
 /**
  * @swagger
@@ -250,24 +251,24 @@ router.post('/', async (req, res) => {
  */
 router.put('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { email, name, password } = req.body;
+    const { id } = req.params
+    const { email, name, password } = req.body
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
       where: { id: Number(id) },
-    });
+    })
 
     if (!existingUser) {
-      res.status(404).json({ error: 'User not found' });
-      return;
+      res.status(404).json({ error: 'User not found' })
+      return
     }
 
     // Prepare update data
-    const updateData: any = {};
-    if (email) updateData.email = email;
-    if (name) updateData.name = name;
-    if (password) updateData.password = await bcrypt.hash(password, 10);
+    const updateData: any = {}
+    if (email) updateData.email = email
+    if (name) updateData.name = name
+    if (password) updateData.password = await bcrypt.hash(password, 10)
 
     // Update user
     const user = await prisma.user.update({
@@ -282,13 +283,14 @@ router.put('/:id', async (req, res) => {
         // Exclude password for security
         password: false,
       },
-    });
+    })
 
-    res.json(user);
+    res.json(user)
   } catch (error) {
-    res.status(400).json({ error: 'Failed to update user' });
+    console.error('Error updating user:', error)
+    res.status(400).json({ error: 'Failed to update user' })
   }
-});
+})
 
 /**
  * @swagger
@@ -311,54 +313,54 @@ router.put('/:id', async (req, res) => {
  */
 router.delete('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const userId = Number(id);
+    const { id } = req.params
+    const userId = Number(id)
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
       where: { id: userId },
-    });
+    })
 
     if (!existingUser) {
-       res.status(404).json({ error: 'User not found' });
-       return;
+      res.status(404).json({ error: 'User not found' })
+      return
     }
 
     // Delete related comments first
     await prisma.comment.deleteMany({
       where: { authorId: userId },
-    });
+    })
 
     // Delete related posts (and their comments)
     // First, get all posts by this user
     const userPosts = await prisma.post.findMany({
       where: { authorId: userId },
       select: { id: true },
-    });
+    })
 
     // Delete comments on those posts
     if (userPosts.length > 0) {
-      const postIds = userPosts.map(post => post.id);
+      const postIds = userPosts.map(post => post.id)
       await prisma.comment.deleteMany({
         where: { postId: { in: postIds } },
-      });
+      })
     }
 
     // Now delete the posts
     await prisma.post.deleteMany({
       where: { authorId: userId },
-    });
+    })
 
     // Finally delete the user
     await prisma.user.delete({
       where: { id: userId },
-    });
+    })
 
-    res.json({ message: 'User deleted successfully' });
+    res.json({ message: 'User deleted successfully' })
   } catch (error) {
-    console.error('Error deleting user:', error);
-    res.status(500).json({ error: 'Failed to delete user' });
+    console.error('Error deleting user:', error)
+    res.status(500).json({ error: 'Failed to delete user' })
   }
-});
+})
 
-export default router; 
+export default router
