@@ -1,7 +1,7 @@
-import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers';
+import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers'
 
 export class PostgresContainer {
-  private container: GenericContainer;
+  private container: GenericContainer
 
   constructor(
     private username: string = 'prisma',
@@ -16,18 +16,18 @@ export class PostgresContainer {
         POSTGRES_DB: this.database,
       })
       .withExposedPorts(this.port)
-      .withWaitStrategy(Wait.forLogMessage('database system is ready to accept connections'));
+      .withWaitStrategy(Wait.forLogMessage('database system is ready to accept connections'))
   }
 
   async start(): Promise<StartedPostgresContainer> {
-    const startedContainer = await this.container.start();
+    const startedContainer = await this.container.start()
     return new StartedPostgresContainer(
       startedContainer,
       this.username,
       this.password,
       this.database,
       this.port
-    );
+    )
   }
 }
 
@@ -41,18 +41,18 @@ export class StartedPostgresContainer {
   ) {}
 
   getHost(): string {
-    return this.container.getHost();
+    return this.container.getHost()
   }
 
   getMappedPort(): number {
-    return this.container.getMappedPort(this.port);
+    return this.container.getMappedPort(this.port)
   }
 
   getConnectionUrl(): string {
-    return `postgresql://${this.username}:${this.password}@${this.getHost()}:${this.getMappedPort()}/${this.database}?schema=public`;
+    return `postgresql://${this.username}:${this.password}@${this.getHost()}:${this.getMappedPort()}/${this.database}?schema=public`
   }
 
   async stop(): Promise<void> {
-    await this.container.stop();
+    await this.container.stop()
   }
-} 
+}
