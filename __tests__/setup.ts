@@ -4,8 +4,12 @@ import { configureApp } from '../src/app'
 import dotenv from 'dotenv'
 import path from 'path'
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql'
+import { exec } from 'child_process'
+import { promisify } from 'util'
 
 dotenv.config({ path: path.resolve(__dirname, '../.env.test') })
+
+const execAsync = promisify(exec)
 
 let container: StartedPostgreSqlContainer
 let databaseUrl: string
@@ -37,6 +41,8 @@ beforeAll(async () => {
   databaseUrl = `postgresql://${container.getUsername()}:${container.getPassword()}@${container.getHost()}:${container.getPort()}/${container.getDatabase()}`
 
   process.env.DATABASE_URL = databaseUrl
+
+  await execAsync('prisma migrate dev --name "init"')
   app = configureApp(3000)
 }, 60000)
 

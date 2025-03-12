@@ -25,9 +25,6 @@ jobs:
       - name: Run ESLint
         run: npm run lint
       
-      - name: Generate Prisma client
-        run: npm run prisma:generate
-      
       - name: Build
         run: npm run build
       
