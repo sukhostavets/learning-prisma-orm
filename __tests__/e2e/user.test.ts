@@ -1,5 +1,5 @@
 import request from 'supertest'
-import { seedDatabase, clearDatabase, app } from '../setup'
+import { seedDatabase, clearDatabase, getApp } from '../test-utils'
 
 describe('User API Endpoints', () => {
   let testData: any
@@ -16,7 +16,7 @@ describe('User API Endpoints', () => {
 
   describe('GET /api/users', () => {
     it('should return all users', async () => {
-      const response = await request(app).get('/api/users')
+      const response = await request(getApp()).get('/api/users')
 
       expect(response.status).toBe(200)
       expect(Array.isArray(response.body)).toBe(true)
@@ -33,7 +33,7 @@ describe('User API Endpoints', () => {
   describe('GET /api/users/:id', () => {
     it('should return a user by ID', async () => {
       const userId = testData.users[0].id
-      const response = await request(app).get(`/api/users/${userId}`)
+      const response = await request(getApp()).get(`/api/users/${userId}`)
 
       expect(response.status).toBe(200)
       expect(response.body.id).toBe(userId)
@@ -44,7 +44,7 @@ describe('User API Endpoints', () => {
     })
 
     it('should return 404 for non-existent user', async () => {
-      const response = await request(app).get('/api/users/9999')
+      const response = await request(getApp()).get('/api/users/9999')
 
       expect(response.status).toBe(404)
       expect(response.body.error).toBe('User not found')
@@ -59,7 +59,7 @@ describe('User API Endpoints', () => {
         password: 'password123',
       }
 
-      const response = await request(app).post('/api/users').send(newUser)
+      const response = await request(getApp()).post('/api/users').send(newUser)
 
       expect(response.status).toBe(201)
       expect(response.body.email).toBe(newUser.email)
@@ -75,7 +75,7 @@ describe('User API Endpoints', () => {
         password: 'password123',
       }
 
-      const response = await request(app).post('/api/users').send(duplicateUser)
+      const response = await request(getApp()).post('/api/users').send(duplicateUser)
 
       expect(response.status).toBe(409)
       expect(response.body.error).toBe('Email already exists')
@@ -89,7 +89,7 @@ describe('User API Endpoints', () => {
         name: 'Updated Name',
       }
 
-      const response = await request(app).put(`/api/users/${userId}`).send(updatedData)
+      const response = await request(getApp()).put(`/api/users/${userId}`).send(updatedData)
 
       expect(response.status).toBe(200)
       expect(response.body.id).toBe(userId)
@@ -98,7 +98,7 @@ describe('User API Endpoints', () => {
     })
 
     it('should return 404 for non-existent user', async () => {
-      const response = await request(app).put('/api/users/9999').send({ name: 'Updated Name' })
+      const response = await request(getApp()).put('/api/users/9999').send({ name: 'Updated Name' })
 
       expect(response.status).toBe(404)
       expect(response.body.error).toBe('User not found')
@@ -109,18 +109,18 @@ describe('User API Endpoints', () => {
     it('should delete a user', async () => {
       const userId = testData.users[2].id
 
-      const response = await request(app).delete(`/api/users/${userId}`)
+      const response = await request(getApp()).delete(`/api/users/${userId}`)
 
       expect(response.status).toBe(200)
       expect(response.body.message).toBe('User deleted successfully')
 
       // Verify the user is deleted
-      const getResponse = await request(app).get(`/api/users/${userId}`)
+      const getResponse = await request(getApp()).get(`/api/users/${userId}`)
       expect(getResponse.status).toBe(404)
     })
 
     it('should return 404 for non-existent user', async () => {
-      const response = await request(app).delete('/api/users/9999')
+      const response = await request(getApp()).delete('/api/users/9999')
 
       expect(response.status).toBe(404)
       expect(response.body.error).toBe('User not found')

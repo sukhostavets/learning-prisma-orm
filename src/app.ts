@@ -3,19 +3,13 @@ import cors from 'cors'
 import swaggerUi from 'swagger-ui-express'
 import swaggerJsdoc from 'swagger-jsdoc'
 
-// Import routes
-import userRoutes from './routes/userRoutes'
-import postRoutes from './routes/postRoutes'
-import commentRoutes from './routes/commentRoutes'
-import testRoutes from './routes/testRoutes'
+import { getUserRouter } from './routes/userRoutes'
+import { getPostRouter } from './routes/postRoutes'
+import { getCommentRouter } from './routes/commentRoutes'
+import { getTestRouter } from './routes/testRoutes'
+import { Context } from './prepareContext'
 
-/**
- * Configure the Express application
- * @param port - The port number for the server
- * @returns The configured Express application
- */
-export const configureApp = (port: number | string = 3000) => {
-  // Initialize Express app
+export const configureApp = (context: Context) => {
   const app = express()
 
   // Middleware
@@ -23,7 +17,6 @@ export const configureApp = (port: number | string = 3000) => {
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
 
-  // Swagger configuration
   const swaggerOptions = {
     definition: {
       openapi: '3.0.0',
@@ -34,24 +27,22 @@ export const configureApp = (port: number | string = 3000) => {
       },
       servers: [
         {
-          url: `http://localhost:${port}`,
+          url: `http://localhost:${context.port}`,
           description: 'Development server',
         },
       ],
     },
-    apis: ['./src/routes/*.ts'], // Path to the API docs
+    apis: ['./src/routes/*.ts'],
   }
 
   const swaggerDocs = swaggerJsdoc(swaggerOptions)
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 
-  // Routes
-  app.use('/api/users', userRoutes)
-  app.use('/api/posts', postRoutes)
-  app.use('/api/comments', commentRoutes)
-  app.use('/api/test', testRoutes)
+  app.use('/api/users', getUserRouter(context))
+  app.use('/api/posts', getPostRouter(context))
+  app.use('/api/comments', getCommentRouter(context))
+  app.use('/api/test', getTestRouter(context))
 
-  // Root route
   app.get('/', (req, res) => {
     res.json({ message: 'Welcome to Prisma ORM Learning API' })
   })
@@ -59,15 +50,9 @@ export const configureApp = (port: number | string = 3000) => {
   return app
 }
 
-/**
- * Start the Express server
- * @param app - The configured Express application
- * @param port - The port number for the server
- * @returns The HTTP server instance
- */
-export const startServer = (app: express.Application, port: number | string = 3000) => {
-  return app.listen(port, () => {
-    console.log(`Server is running on port ${port}`)
-    console.log(`Swagger documentation available at http://localhost:${port}/api-docs`)
+export const startServer = (app: express.Application, context: Context) => {
+  return app.listen(context.port, () => {
+    console.log(`Server is running on port ${context.port}`)
+    console.log(`Swagger documentation available at http://localhost:${context.port}/api-docs`)
   })
 }

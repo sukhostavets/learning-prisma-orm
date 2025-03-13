@@ -8,6 +8,7 @@ module.exports = {
   clearMocks: true,
   resetMocks: true,
   restoreMocks: true,
-  setupFilesAfterEnv: ['./__tests__/setup.ts'],
+  globalSetup: './__tests__/jest.setup.ts',
+  globalTeardown: './__tests__/jest.teardown.ts',
   testTimeout: 60000, // Increase timeout for tests using containers
 }

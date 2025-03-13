@@ -1,5 +1,5 @@
 import request from 'supertest'
-import { seedDatabase, clearDatabase, app } from '../setup'
+import { seedDatabase, clearDatabase, getApp } from '../test-utils'
 
 describe('Post API Endpoints', () => {
   let testData: any
@@ -16,7 +16,7 @@ describe('Post API Endpoints', () => {
 
   describe('GET /api/posts', () => {
     it('should return all posts', async () => {
-      const response = await request(app).get('/api/posts')
+      const response = await request(getApp()).get('/api/posts')
 
       expect(response.status).toBe(200)
       expect(Array.isArray(response.body)).toBe(true)
@@ -30,7 +30,7 @@ describe('Post API Endpoints', () => {
     })
 
     it('should filter posts by published status', async () => {
-      const response = await request(app).get('/api/posts?published=true')
+      const response = await request(getApp()).get('/api/posts?published=true')
 
       expect(response.status).toBe(200)
       expect(Array.isArray(response.body)).toBe(true)
@@ -46,7 +46,7 @@ describe('Post API Endpoints', () => {
   describe('GET /api/posts/:id', () => {
     it('should return a post by ID', async () => {
       const postId = testData.posts[0].id
-      const response = await request(app).get(`/api/posts/${postId}`)
+      const response = await request(getApp()).get(`/api/posts/${postId}`)
 
       expect(response.status).toBe(200)
       expect(response.body.id).toBe(postId)
@@ -63,7 +63,7 @@ describe('Post API Endpoints', () => {
     })
 
     it('should return 404 for non-existent post', async () => {
-      const response = await request(app).get('/api/posts/9999')
+      const response = await request(getApp()).get('/api/posts/9999')
 
       expect(response.status).toBe(404)
       expect(response.body.error).toBe('Post not found')
@@ -79,7 +79,7 @@ describe('Post API Endpoints', () => {
         authorId: testData.users[0].id,
       }
 
-      const response = await request(app).post('/api/posts').send(newPost)
+      const response = await request(getApp()).post('/api/posts').send(newPost)
 
       expect(response.status).toBe(201)
       expect(response.body.title).toBe(newPost.title)
@@ -96,7 +96,7 @@ describe('Post API Endpoints', () => {
         authorId: 9999, // Non-existent author
       }
 
-      const response = await request(app).post('/api/posts').send(newPost)
+      const response = await request(getApp()).post('/api/posts').send(newPost)
 
       expect(response.status).toBe(404)
       expect(response.body.error).toBe('Author not found')
@@ -112,7 +112,7 @@ describe('Post API Endpoints', () => {
         published: false,
       }
 
-      const response = await request(app).put(`/api/posts/${postId}`).send(updatedData)
+      const response = await request(getApp()).put(`/api/posts/${postId}`).send(updatedData)
 
       expect(response.status).toBe(200)
       expect(response.body.id).toBe(postId)
@@ -122,7 +122,9 @@ describe('Post API Endpoints', () => {
     })
 
     it('should return 404 for non-existent post', async () => {
-      const response = await request(app).put('/api/posts/9999').send({ title: 'Updated Title' })
+      const response = await request(getApp())
+        .put('/api/posts/9999')
+        .send({ title: 'Updated Title' })
 
       expect(response.status).toBe(404)
       expect(response.body.error).toBe('Post not found')
@@ -133,18 +135,18 @@ describe('Post API Endpoints', () => {
     it('should delete a post', async () => {
       const postId = testData.posts[2].id
 
-      const response = await request(app).delete(`/api/posts/${postId}`)
+      const response = await request(getApp()).delete(`/api/posts/${postId}`)
 
       expect(response.status).toBe(200)
       expect(response.body.message).toBe('Post deleted successfully')
 
       // Verify the post is deleted
-      const getResponse = await request(app).get(`/api/posts/${postId}`)
+      const getResponse = await request(getApp()).get(`/api/posts/${postId}`)
       expect(getResponse.status).toBe(404)
     })
 
     it('should return 404 for non-existent post', async () => {
-      const response = await request(app).delete('/api/posts/9999')
+      const response = await request(getApp()).delete('/api/posts/9999')
 
       expect(response.status).toBe(404)
       expect(response.body.error).toBe('Post not found')

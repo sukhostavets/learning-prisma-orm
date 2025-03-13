@@ -1,34 +1,32 @@
 import { PrismaClient } from '@prisma/client'
 
-// Initialize Prisma client with optional URL
-const createPrismaClient = (databaseUrl?: string) => {
-  const prismaOptions: any = {}
+let prisma: PrismaClient
 
-  // If a database URL is provided, use it
-  if (databaseUrl) {
-    prismaOptions.datasources = {
-      db: {
-        url: databaseUrl,
-      },
+export const getPrismaClient = (databaseUrl?: string) => {
+  if (!prisma) {
+    const prismaOptions: any = {}
+
+    // If a database URL is provided, use it
+    if (databaseUrl) {
+      prismaOptions.datasources = {
+        db: {
+          url: databaseUrl,
+        },
+      }
     }
+
+    prisma = new PrismaClient(prismaOptions)
+
+    process.on('SIGINT', async () => {
+      await prisma.$disconnect()
+      process.exit(0)
+    })
+
+    process.on('SIGTERM', async () => {
+      await prisma.$disconnect()
+      process.exit(0)
+    })
   }
 
-  return new PrismaClient(prismaOptions)
+  return prisma
 }
-
-// Create the default Prisma client
-const prisma = createPrismaClient()
-
-// Handle graceful shutdown
-process.on('SIGINT', async () => {
-  await prisma.$disconnect()
-  process.exit(0)
-})
-
-process.on('SIGTERM', async () => {
-  await prisma.$disconnect()
-  process.exit(0)
-})
-
-export default prisma
-export { createPrismaClient }
